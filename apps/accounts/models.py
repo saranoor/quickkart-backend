@@ -1,38 +1,37 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
-from django.contrib.auth.models import AbstractUser
 
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
-class User(AbstractUser):
-    phone = models.CharField(max_length=20, unique=True)
-    email = models.EmailField(blank=True, null=True)
+class User(AbstractBaseUser, PermissionsMixin):
+    phone = models.CharField(max_length=15, unique=True)
     name = models.CharField(max_length=255)
+    email = models.EmailField(blank=True, null=True)
 
-    # business metrics
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(blank=True, null=True)
+
     total_orders = models.PositiveIntegerField(default=0)
-    lifetime_value = models.DecimalField(
-        max_digits=12, decimal_places=2, default=0
-    )
-    cod_limit = models.PositiveIntegerField(default=500)
+    lifetime_value = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    # preferences & status
     preferred_categories = models.JSONField(default=list, blank=True)
+
     verification_status = models.CharField(
         max_length=20,
         choices=[
-            ("unverified", "Unverified"),
+            ("pending", "Pending"),
             ("verified", "Verified"),
             ("blocked", "Blocked"),
         ],
-        default="unverified",
+        default="pending"
     )
 
-    # system fields
+    cod_limit = models.PositiveIntegerField(default=500)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
-    last_login = models.DateTimeField(blank=True, null=True)
 
     USERNAME_FIELD = "phone"
     REQUIRED_FIELDS = ["name"]
