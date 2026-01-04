@@ -2,6 +2,8 @@
 
 QuickCart is a Django REST API skeleton for OTP-based authentication and user profile management for a commerce app.
 
+Use `.env.example` as a starting point for configuration.
+
 ## Features
 - Phone-number based custom user model with JWT auth via SimpleJWT.
 - OTP request and verification endpoints that issue 6-digit codes, valid for 5 minutes and logged to the console in development.
@@ -19,11 +21,12 @@ QuickCart is a Django REST API skeleton for OTP-based authentication and user pr
    - macOS/Linux: `python -m venv .venv && source .venv/bin/activate`
 2. Install dependencies:
    `pip install "Django==3.2.25" djangorestframework djangorestframework-simplejwt`
-3. Apply migrations:
+3. Copy `.env.example` to `.env` and adjust values (secret key, debug flag, hosts, provider settings).
+4. Apply migrations:
    `python manage.py migrate`
-4. Run the API:
+5. Run the API:
    `python manage.py runserver`
-5. (Optional) Create a superuser if you want admin access:
+6. (Optional) Create a superuser if you want admin access:
    `python manage.py createsuperuser`
 
 ## API quickstart
@@ -59,3 +62,11 @@ Immutable fields such as `phone`, `verification_status`, `total_orders`, and `li
 ## Notes
 - Development settings keep `DEBUG=True` and an inline `SECRET_KEY`; set environment variables and harden settings before production.
 - OTPs are stored in the database and expire after 5 minutes; SMS delivery is stubbed by printing to the console.
+
+## Production notes
+- OTP provider interface: wire the OTP sender to an external provider (e.g., AWS SNS) and supply credentials via environment variables (see `.env.example`), replacing the console stub.
+- Logging: configure Django/DRF logging to ship structured logs to your log sink and tune `LOG_LEVEL` per environment.
+- Rate limits: add per-phone and per-IP throttling on `/api/auth/request-otp/` (e.g., DRF throttling or a gateway-based rate limit) to prevent abuse.
+
+## Known dev stubs
+- OTP is printed to the console in dev; production integrates SNS (or another SMS provider).
