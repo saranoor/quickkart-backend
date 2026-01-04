@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: QuickCart API
+  version: 1.0.0
+  description: Authentication and User Profile APIs
+paths:
+  /api/auth/request-otp/:
+    post:
+      operationId: auth_request_otp_create
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  example: '+923001234567'
+              required:
+              - phone
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                message: OTP sent
+          description: ''
+  /api/auth/verify-otp/:
+    post:
+      operationId: auth_verify_otp_create
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  example: '+923001234567'
+                otp:
+                  type: string
+                  example: '123456'
+              required:
+              - phone
+              - otp
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
+  /api/user/profile:
+    get:
+      operationId: user_profile_retrieve
+      tags:
+      - User
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+    put:
+      operationId: user_profile_update
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      - bearerAuth: []
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        phone:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        total_orders:
+          type: integer
+          readOnly: true
+        lifetime_value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        preferred_categories: {}
+        verification_status:
+          allOf:
+          - $ref: '#/components/schemas/VerificationStatusEnum'
+          readOnly: true
+        cod_limit:
+          type: integer
+          readOnly: true
+      required:
+      - cod_limit
+      - created_at
+      - id
+      - last_login
+      - lifetime_value
+      - name
+      - phone
+      - total_orders
+      - verification_status
+    VerificationStatusEnum:
+      enum:
+      - pending
+      - verified
+      - blocked
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `verified` - Verified
+        * `blocked` - Blocked
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -7,16 +7,23 @@ from rest_framework.permissions import AllowAny
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 import random
+from drf_spectacular.utils import extend_schema
+
 
 from .models import OTP, User
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+    responses=UserProfileSerializer,
+    tags=["User"],
+    )
     def get(self, request):
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data)
 
+    
     def put(self, request):
         serializer = UserProfileSerializer(
             request.user,
@@ -30,6 +37,19 @@ class UserProfileView(APIView):
 class RequestOTPView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "phone": {"type": "string", "example": "+923001234567"},
+                },
+                "required": ["phone"],
+            }
+        },
+        responses={200: {"message": "OTP sent"}},
+        tags=["Auth"],
+    )
     def post(self, request):
         phone = request.data.get("phone")
 
@@ -46,6 +66,42 @@ class RequestOTPView(APIView):
 class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        tags=["Auth"],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "phone": {
+                        "type": "string",
+                        "example": "+923001234567"
+                    },
+                    "otp": {
+                        "type": "string",
+                        "example": "123456"
+                    },
+                },
+                "required": ["phone", "otp"],
+            }
+        },
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "access": {
+                        "type": "string",
+                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                }
+            },
+            400: {
+                "type": "object",
+                "properties": {
+                    "error": {"type": "string"}
+                }
+            }
+        },
+    )
     def post(self, request):
         phone = request.data.get("phone")
         code = request.data.get("otp")
