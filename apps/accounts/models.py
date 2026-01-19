@@ -47,4 +47,5 @@ class OTP(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def is_expired(self):
-        return timezone.now() > self.created_at + timedelta(minutes=5)
+        print(f"is the token expired: {timezone.now() > self.created_at + timedelta(minutes=50)}")
+        return timezone.now() > self.created_at + timedelta(minutes=50)

@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 import random
 from drf_spectacular.utils import extend_schema
-
+from backend.celery import debug_task
 
 from .models import OTP, User
 
@@ -21,6 +21,8 @@ class UserProfileView(APIView):
     )
     def get(self, request):
         serializer = UserProfileSerializer(request.user)
+        print("calling debug task")
+        debug_task.delay(request.user.id)
         return Response(serializer.data)
 
     

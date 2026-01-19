@@ -68,3 +68,15 @@ Immutable fields such as `phone`, `verification_status`, `total_orders`, and `li
 ## Notes
 - Development settings keep `DEBUG=True` and an inline `SECRET_KEY`; set environment variables and harden settings before production.
 - OTPs are stored in the database and expire after 5 minutes; SMS delivery is stubbed by printing to the console.
+
+## For celery
+pip install celery
+
+# set redis as message broker in docker
+docker run -p 6379:6379 --name some-redis -d redis
+
+# to run worker
+celery -A backend worker --pool=solo -l info
+
+# to check worker status
+celery -A backend inspect active
